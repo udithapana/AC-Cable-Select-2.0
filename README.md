@@ -1,63 +1,80 @@
-# AC Cable Selection — PWA package
+# AC Cable Selection — PWA package (flat structure)
 
-This folder is a ready-to-host Progressive Web App. Keep the folder structure
-exactly as-is (`index.html`, `manifest.json`, `service-worker.js`, and the
-`icons/` folder all sit next to each other) — everything uses relative paths
-so it works whether it's hosted at a domain root or a sub-path.
+Every file in this folder sits at the **same level** — no subfolders. This is
+deliberate: GitHub's drag-and-drop upload can silently flatten folder
+structure, and the manifest/icons only work if every file lands exactly
+where it's referenced from. A flat structure removes that failure mode
+entirely — there's no folder nesting left to get wrong.
 
-## 1. Host it (GitHub Pages, ~5 minutes)
+## 1. Create the repo and upload
 
-1. Create a new GitHub repo (public repos get free Pages hosting).
-2. Upload all the files in this folder, preserving the `icons/` subfolder.
-3. Repo → **Settings → Pages** → Source: **Deploy from a branch** → Branch:
-   `main`, folder `/ (root)` → Save.
-4. GitHub gives you a URL like:
-   `https://<your-username>.github.io/<repo-name>/`
-5. Open it — it should load the app. On Android Chrome you'll get an
-   "Install app" prompt; on desktop Chrome, an install icon appears in the
-   address bar. That confirms the PWA is valid before you package it.
+1. Go to **github.com → New repository**. Any name, Public.
+2. Open the new repo → **Add file → Upload files**.
+3. Open this folder on your computer, select **all 14 files** (Ctrl/Cmd+A),
+   and drag them all into the GitHub upload box at once.
+4. Confirm the file list GitHub shows you matches this folder exactly —
+   14 files, no folders, nothing missing:
+   ```
+   index.html
+   manifest.json
+   service-worker.js
+   icon-192.png
+   icon-512.png
+   icon-maskable-192.png
+   icon-maskable-512.png
+   apple-touch-icon.png
+   favicon-32.png
+   favicon-16.png
+   mobile-1.png
+   mobile-2.png
+   desktop.png
+   README.md
+   ```
+5. Commit the upload (the default commit message is fine).
 
-(Netlify or Vercel work the same way if you'd rather drag-and-drop the
-folder instead of using Git.)
+## 2. Turn on GitHub Pages
 
-## 2. Generate the Android package with PWABuilder
+1. Repo → **Settings → Pages**.
+2. Source: **Deploy from a branch** → Branch: `main`, folder `/ (root)` →
+   **Save**.
+3. Repo → **Actions** tab → wait for the Pages build to finish with a green
+   checkmark (usually under a minute).
+4. Your URL: `https://<your-username>.github.io/<repo-name>/`
 
-1. Go to **pwabuilder.com**.
-2. Paste your GitHub Pages URL and click **Start**.
-3. It will fetch `manifest.json` and audit the app — you should see green
-   checks for manifest, service worker, and icons.
-4. Click **Package for stores → Android**.
-5. Choose:
-   - **Signing key**: let PWABuilder generate one for you (keep the
-     downloaded `.keystore` file safe — you'll need it for any future
-     updates to the same app listing).
-   - **Package type**: Trusted Web Activity (default) is right for this.
-6. Download the package — you'll get a signed `.apk` (installable directly
-   on a phone for testing) and an `.aab` (the format Google Play wants for
-   a store listing).
+## 3. Verify it's actually installable before packaging an APK
 
-## 3. Install / test
+1. Open the URL from step 2 on **desktop Chrome**.
+2. Open DevTools (F12) → **Application** tab → **Manifest**.
+   - If everything's right, you'll see your REGEN app name, icons, and
+     colors, with **no red errors** at the top.
+   - If something's still wrong, this panel tells you exactly which file
+     it couldn't find — screenshot that error and send it over.
+3. On Android Chrome, visiting the same URL should offer **"Install app"**
+   (or an install icon in the address bar on desktop). That confirms it's
+   ready for PWABuilder.
 
-- Sideload the `.apk` onto an Android phone (enable "Install unknown apps"
-  for your file manager/browser first), or
-- Upload the `.aab` to a Google Play Console **Internal testing** track for
-  a proper install-from-Play test.
+## 4. Then generate the APK
+
+Go to **pwabuilder.com**, paste your GitHub Pages URL, and follow the
+Android packaging steps from there (signing key, Trusted Web Activity,
+download the `.apk`/`.aab`).
 
 ## Updating later
 
-When you change `index.html`, bump `CACHE_VERSION` at the top of
-`service-worker.js` (e.g. `cable-select-v2`) before redeploying — that's
-what makes returning users' cached copies refresh instead of sticking on
-the old version. Re-run PWABuilder against the same hosted URL if you also
-want to rebuild the APK.
+When you change `index.html` or any asset, bump `CACHE_VERSION` at the top
+of `service-worker.js` (e.g. `cable-select-flat-v2`) before re-uploading —
+that's what makes returning visitors' cached copies refresh instead of
+sticking on the old version.
 
 ## What's included
 
-- `index.html` — the app itself
-- `manifest.json` — PWA metadata (name, icons, colors, display mode, screenshots)
+- `index.html` — the app itself, now with your REGEN logo in the PDF
+  report header
+- `manifest.json` — PWA metadata (name, icons, colors, display mode,
+  screenshots)
 - `service-worker.js` — offline caching (cache-first for the app shell)
-- `icons/` — app icons at the sizes Android/iOS/desktop expect, including
-  maskable variants for adaptive Android icons
-- `screenshots/` — real screenshots of the app (2 mobile, 1 desktop),
-  referenced from `manifest.json` so PWABuilder and the Play Store listing
-  have them ready-made
+- `icon-*.png`, `favicon-*.png`, `apple-touch-icon.png` — app icons at the
+  sizes Android/iOS/desktop expect, including maskable variants for
+  Android's adaptive icon shape
+- `mobile-1.png`, `mobile-2.png`, `desktop.png` — screenshots referenced
+  from `manifest.json` for the install prompt / store listing

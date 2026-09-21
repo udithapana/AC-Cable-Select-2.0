@@ -1,20 +1,20 @@
 // Bump this version string whenever you redeploy index.html / assets,
 // so returning visitors get the update instead of a stale cache.
-const CACHE_VERSION = 'cable-select-v11';
+const CACHE_VERSION = 'cable-select-flat-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-192.png',
-  './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png',
-  './icons/favicon-32.png',
-  './icons/favicon-16.png',
-  './screenshots/mobile-1.png',
-  './screenshots/mobile-2.png',
-  './screenshots/desktop.png',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-192.png',
+  './icon-maskable-512.png',
+  './apple-touch-icon.png',
+  './favicon-32.png',
+  './favicon-16.png',
+  './mobile-1.png',
+  './mobile-2.png',
+  './desktop.png',
 ];
 
 self.addEventListener('install', (event) => {
