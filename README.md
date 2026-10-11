@@ -72,7 +72,7 @@ download the `.apk`/`.aab`).
 ## Updating later
 
 When you change `index.html` or any asset, bump the version in `CACHE_VERSION` at the top
-of `service-worker.js` (e.g. `v2` → `v3`; keep the `cable-select-` prefix so it never touches your other apps' caches) before re-uploading —
+of `service-worker.js` (e.g. `v3` → `v4`; keep the `cable-select-` prefix so it never touches your other apps' caches) before re-uploading —
 that's what makes returning visitors' cached copies refresh instead of
 sticking on the old version.
 

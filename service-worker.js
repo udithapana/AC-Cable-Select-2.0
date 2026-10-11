@@ -6,7 +6,7 @@
 // name starts with CACHE_PREFIX, so it can't wipe the offline copies of your
 // other apps (Commissioning, SLD, etc.).
 const CACHE_PREFIX = 'cable-select-';
-const CACHE_VERSION = CACHE_PREFIX + 'v2';
+const CACHE_VERSION = CACHE_PREFIX + 'v3';
 const CORE_ASSETS = [
   './',
   './index.html',

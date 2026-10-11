@@ -666,6 +666,7 @@
 
 <footer>
   Cable ampacity, grouping and voltage-drop coefficients carried over from the source workbook's "Cable Selection" and "Sheet2" tables (Al/Cu, unarmoured, SWA armoured, and ABC families). Installation-method temperature/enclosure factor and parallel-run grouping factors applied per that data. Verify against the applicable wiring regulation before construction.
+  <div style="margin-top:10px; color:var(--text-dim);">© <span id="copyYear">2026</span> Regen Renewables (Pvt) Ltd. All Rights Reserved. · 31/10, Castle Street, Colombo 8. 00800 Sri Lanka · regen.lk</div>
 </footer>
 
 <script>
@@ -1247,6 +1248,7 @@ function recalc(){
     $(id).addEventListener('input', recalc);
   });
 
+$('copyYear').textContent = new Date().getFullYear();
 refreshCableTypeOptions();
 // Start blank - no sample inverters or lengths prefilled. Add your own via
 // "+ Add inverter line" below.
@@ -1534,10 +1536,24 @@ function generatePdfReport(){
   const COPPER=[201,118,74], STEEL=[58,141,201], INK=[28,33,38], MUTED=[107,118,128];
   const OK=[46,139,79], OK_BG=[234,246,238], WARN=[184,134,11], WARN_BG=[255,248,230];
   const BAD_BG=[253,236,234], LINE=[226,230,234], PANEL=[247,248,250];
-  const FOOTER_H = 24; // space reserved at the bottom of every page for the footer (disclaimer + Regen notice)
+  // ---- Company footer (required on all Regen documents) ----
+  // Wording is verbatim from management's instruction - do not edit casually.
+  const FOOTER_FONT = 6.5, FOOTER_LH = 3.0;
+  const FOOTER_DISCLAIMER = 'Verify all cable selections against the applicable wiring regulation and project specification before construction.';
+  const FOOTER_COPYRIGHT = `© ${new Date().getFullYear()} Regen Renewables (Pvt) Ltd. All Rights Reserved.`;
+  const FOOTER_NOTICE = 'This document, including all designs, drawings, specifications and technical information, is the intellectual property of Regen Renewables (Pvt) Ltd. It is confidential and may not be copied, reproduced, modified, distributed or shared with third parties without prior written consent.';
+  const FOOTER_COMPANY = 'Regen Renewables (Pvt) Ltd.   |   31/10, Castle Street, Colombo 8. 00800 Sri Lanka   |   regen.lk';
+  doc.setFont('helvetica','normal'); doc.setFontSize(FOOTER_FONT);
+  const footerNoticeLines = doc.splitTextToSize(FOOTER_NOTICE, CONTENT_W);
+  const footerLineCount = 1 /*disclaimer*/ + 1 /*copyright*/ + footerNoticeLines.length + 1 /*company*/;
+  const FOOTER_LAST_BASELINE = PAGE_H - 7;
+  const FOOTER_FIRST_BASELINE = FOOTER_LAST_BASELINE - (footerLineCount-1)*FOOTER_LH;
+  const FOOTER_RULE_Y = FOOTER_FIRST_BASELINE - 4;
+  const CONTENT_BOTTOM = FOOTER_RULE_Y - 3;          // nothing in the body may go below this
+  const FOOTER_H = PAGE_H - MARGIN - CONTENT_BOTTOM; // kept for the autoTable page-break margins
 
   function ensureSpace(h){
-    if (y + h > PAGE_H - MARGIN - FOOTER_H){ doc.addPage(); y = MARGIN; }
+    if (y + h > CONTENT_BOTTOM){ doc.addPage(); y = MARGIN; }
   }
   function sectionHeader(title){
     ensureSpace(12);
@@ -1834,23 +1850,27 @@ function generatePdfReport(){
   });
   y += totalTextHeight + 8;
 
-  // Footer + page numbers on every page (incl. Regen copyright/confidentiality notice)
+  // Footer on every page: disclaimer + page no., then the Regen copyright /
+  // confidentiality notice and company details (management requirement).
   const pageCount = doc.internal.getNumberOfPages();
-  const year = new Date().getFullYear();
-  doc.setFont('helvetica','normal'); doc.setFontSize(7);
-  const noticeLines = doc.splitTextToSize(
-    `© ${year} Regen Renewables (Pvt) Ltd. All rights reserved. Confidential - this document may not be copied, distributed or disclosed without the written permission of Regen Renewables (Pvt) Ltd.`,
-    CONTENT_W);
   for (let i=1;i<=pageCount;i++){
     doc.setPage(i);
-    doc.setDrawColor(...LINE);
-    doc.line(MARGIN, PAGE_H-FOOTER_H+2, PAGE_W-MARGIN, PAGE_H-FOOTER_H+2);
-    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...MUTED);
-    let fy = PAGE_H-FOOTER_H+7;
-    doc.text('Verify all cable selections against the applicable wiring regulation and project specification before construction.', MARGIN, fy);
+    doc.setDrawColor(...LINE); doc.setLineWidth(0.3);
+    doc.line(MARGIN, FOOTER_RULE_Y, PAGE_W-MARGIN, FOOTER_RULE_Y);
+    let fy = FOOTER_FIRST_BASELINE;
+    doc.setFontSize(FOOTER_FONT);
+    doc.setFont('helvetica','italic'); doc.setTextColor(...MUTED);
+    doc.text(FOOTER_DISCLAIMER, MARGIN, fy);
+    doc.setFont('helvetica','normal');
     doc.text(`Page ${i} of ${pageCount}`, PAGE_W-MARGIN, fy, {align:'right'});
-    doc.setFont('helvetica','bold');
-    noticeLines.forEach(line => { fy += 3.6; doc.text(line, MARGIN, fy); });
+    fy += FOOTER_LH;
+    doc.setFont('helvetica','bold'); doc.setTextColor(...INK);
+    doc.text(FOOTER_COPYRIGHT, MARGIN, fy);
+    doc.setFont('helvetica','normal'); doc.setTextColor(...MUTED);
+    footerNoticeLines.forEach(line => { fy += FOOTER_LH; doc.text(line, MARGIN, fy); });
+    fy += FOOTER_LH;
+    doc.setFont('helvetica','bold'); doc.setTextColor(...COPPER);
+    doc.text(FOOTER_COMPANY, MARGIN, fy);
   }
 
   const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
