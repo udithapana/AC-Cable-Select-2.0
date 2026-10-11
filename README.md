@@ -6,9 +6,19 @@ structure, and the manifest/icons only work if every file lands exactly
 where it's referenced from. A flat structure removes that failure mode
 entirely — there's no folder nesting left to get wrong.
 
+## 0. Give it its own repository (important)
+
+Do **not** upload this into an existing app's repository (e.g.
+`Solar_Site_Inspection_App-3.0`). Phones identify an installed web app by its
+address, so two different apps at the same address clash — one replaces or
+blocks the other, and Chrome can show "This app cannot be installed".
+Create a new repository just for this tool, e.g. `Cable-Selection-App`, so it
+gets its own address: `https://udithapana.github.io/Cable-Selection-App/`.
+Your other apps stay installed and untouched.
+
 ## 1. Create the repo and upload
 
-1. Go to **github.com → New repository**. Any name, Public.
+1. Go to **github.com → New repository**. Name it e.g. `Cable-Selection-App`, Public.
 2. Open the new repo → **Add file → Upload files**.
 3. Open this folder on your computer, select **all 14 files** (Ctrl/Cmd+A),
    and drag them all into the GitHub upload box at once.
@@ -61,8 +71,8 @@ download the `.apk`/`.aab`).
 
 ## Updating later
 
-When you change `index.html` or any asset, bump `CACHE_VERSION` at the top
-of `service-worker.js` (e.g. `cable-select-flat-v2`) before re-uploading —
+When you change `index.html` or any asset, bump the version in `CACHE_VERSION` at the top
+of `service-worker.js` (e.g. `v2` → `v3`; keep the `cable-select-` prefix so it never touches your other apps' caches) before re-uploading —
 that's what makes returning visitors' cached copies refresh instead of
 sticking on the old version.
 
