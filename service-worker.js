@@ -6,7 +6,7 @@
 // name starts with CACHE_PREFIX, so it can't wipe the offline copies of your
 // other apps (Commissioning, SLD, etc.).
 const CACHE_PREFIX = 'cable-select-';
-const CACHE_VERSION = CACHE_PREFIX + 'v3';
+const CACHE_VERSION = CACHE_PREFIX + 'v4';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -16,6 +16,9 @@ const CORE_ASSETS = [
   './icon-maskable-192.png',
   './icon-maskable-512.png',
   './apple-touch-icon.png',
+  './apple-touch-icon-167.png',
+  './apple-touch-icon-152.png',
+  './favicon.ico',
   './favicon-32.png',
   './favicon-16.png',
 ];

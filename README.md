@@ -20,10 +20,10 @@ Your other apps stay installed and untouched.
 
 1. Go to **github.com → New repository**. Name it e.g. `Cable-Selection-App`, Public.
 2. Open the new repo → **Add file → Upload files**.
-3. Open this folder on your computer, select **all 14 files** (Ctrl/Cmd+A),
+3. Open this folder on your computer, select **all 17 files** (Ctrl/Cmd+A),
    and drag them all into the GitHub upload box at once.
 4. Confirm the file list GitHub shows you matches this folder exactly —
-   14 files, no folders, nothing missing:
+   17 files, no folders, nothing missing:
    ```
    index.html
    manifest.json
@@ -33,6 +33,9 @@ Your other apps stay installed and untouched.
    icon-maskable-192.png
    icon-maskable-512.png
    apple-touch-icon.png
+   apple-touch-icon-167.png
+   apple-touch-icon-152.png
+   favicon.ico
    favicon-32.png
    favicon-16.png
    mobile-1.png
@@ -63,6 +66,25 @@ Your other apps stay installed and untouched.
    (or an install icon in the address bar on desktop). That confirms it's
    ready for PWABuilder.
 
+## 3b. Getting the icon on iPhone / iPad
+
+iPhones only take the icon from `apple-touch-icon.png` (Safari ignores the
+manifest icons). If you see a blank tile, a screenshot thumbnail or a grey
+letter instead of the cable icon:
+
+1. Make sure you're opening the **new repo's address** — not
+   `Solar_Site_Inspection_App-3.0`, which serves a different app and its own
+   icons.
+2. Check the icon is live: open
+   `https://<your-username>.github.io/<repo-name>/apple-touch-icon.png` in
+   Safari. You should see the copper / grey cable icon on a dark square. If you get a 404, the
+   file didn't upload.
+3. iOS stores the icon when you add the shortcut and never refreshes it.
+   **Delete the old home-screen icon**, close the Safari tab, then reopen
+   the URL and use **Share → Add to Home Screen** again.
+4. Android/Chrome: uninstall the old app first, then reinstall — the
+   launcher also keeps the old icon until then.
+
 ## 4. Then generate the APK
 
 Go to **pwabuilder.com**, paste your GitHub Pages URL, and follow the
@@ -72,19 +94,20 @@ download the `.apk`/`.aab`).
 ## Updating later
 
 When you change `index.html` or any asset, bump the version in `CACHE_VERSION` at the top
-of `service-worker.js` (e.g. `v3` → `v4`; keep the `cable-select-` prefix so it never touches your other apps' caches) before re-uploading —
+of `service-worker.js` (e.g. `v4` → `v5`; keep the `cable-select-` prefix so it never touches your other apps' caches) before re-uploading —
 that's what makes returning visitors' cached copies refresh instead of
 sticking on the old version.
 
 ## What's included
 
-- `index.html` — the app itself, now with your REGEN logo in the PDF
+- `index.html` — the app itself: calculator, History, Backup/Restore tab,
+  A4 PDF report (download or share to WhatsApp/email), REGEN logo in the
   report header
 - `manifest.json` — PWA metadata (name, icons, colors, display mode,
   screenshots)
 - `service-worker.js` — offline caching (cache-first for the app shell)
-- `icon-*.png`, `favicon-*.png`, `apple-touch-icon.png` — app icons at the
-  sizes Android/iOS/desktop expect, including maskable variants for
-  Android's adaptive icon shape
+- `icon-*.png`, `favicon.ico`, `favicon-*.png`, `apple-touch-icon*.png` —
+  cable-mark app icons at the sizes Android/iOS/iPadOS/desktop expect,
+  including maskable variants for Android's adaptive icon shape
 - `mobile-1.png`, `mobile-2.png`, `desktop.png` — screenshots referenced
   from `manifest.json` for the install prompt / store listing

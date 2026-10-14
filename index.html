@@ -14,9 +14,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cable Select">
 <meta name="description" content="Solar inverter AC cable sizing — current capacity, grouping and voltage drop calculator.">
+<link rel="icon" href="favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<!-- iOS/iPadOS home-screen icons: opaque squares (iOS rounds the corners itself) -->
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -320,6 +325,28 @@
   .history-actions .mini-btn.danger:hover{border-color:var(--bad);}
   .history-empty{color:var(--text-faint); font-size:13px; padding:20px 0; text-align:center;}
 
+  /* ---- Report share + Backup ---- */
+  .report-actions .report-btn{margin-bottom:10px;}
+  .report-actions{margin-bottom:8px;}
+  .share-btn{border-color:#2fbf71; color:#4fd88d;}
+  .share-btn.ready{background:#2fbf71; color:#08130c; border-color:#2fbf71;}
+  .share-btn:hover{background:rgba(47,191,113,0.08); color:#7ef0b0; border-color:#7ef0b0;}
+  .backup-stats{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;}
+  .backup-stats > div{background:var(--panel-2); border:1px solid var(--line-soft); padding:10px 12px; border-radius:2px; display:flex; flex-direction:column; gap:4px; min-width:0;}
+  .backup-stats .k{font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.04em;}
+  .backup-stats .v{font-size:15px; color:var(--copper-bright); overflow-wrap:anywhere;}
+  .backup-text{font-size:13px; color:var(--text-dim); line-height:1.55; margin:0 0 14px;}
+  .backup-actions .save-history-btn, .backup-actions .report-btn{margin-bottom:10px;}
+  .restore-preview{margin-top:4px; padding:14px; border:1px solid var(--line); background:var(--panel-2); border-radius:2px;}
+  .restore-summary{font-size:13px; line-height:1.6; margin-bottom:12px; overflow-wrap:anywhere;}
+  .restore-actions{display:flex; flex-direction:column; gap:8px; margin-bottom:8px;}
+  .restore-actions .save-history-btn, .restore-actions .report-btn{margin-bottom:0;}
+  .danger-outline{border-color:var(--bad); color:var(--bad);}
+  .danger-outline:hover{background:rgba(201,106,90,0.08); color:#ff9a90; border-color:#ff9a90;}
+  .restore-msg{font-size:13px; margin-top:10px; line-height:1.5;}
+  .restore-msg.ok{color:var(--good);}
+  .restore-msg.err{color:var(--bad);}
+
 
   /* ---- Result cards ---- */
   .result-card{
@@ -387,6 +414,10 @@
   .result-bar{display:none;}
 
   /* ---- Phones ---- */
+  @media (max-width:400px){
+    .reset-label{display:none;}
+    #resetBtn{padding:9px 12px; font-size:17px;}
+  }
   @media (max-width:600px){
     body{font-size:15px;}
     header{padding:14px 14px 12px; gap:8px;}
@@ -401,7 +432,8 @@
     aside{padding:14px 12px 90px;}
     .card-head{padding:12px 14px;}
     .card-body{padding:14px;}
-    #historyView{padding:14px 12px 60px !important;}
+    #historyView, #backupView{padding:14px 12px 60px !important;}
+    .tab-btn{padding:12px 9px;}
     footer{padding:16px 14px 90px;}
 
     /* 16px stops iOS/Android zooming in when an input is focused */
@@ -478,8 +510,9 @@
   <div style="display:flex; gap:4px;">
     <button class="tab-btn active" id="tabCalcBtn" type="button">Calculator</button>
     <button class="tab-btn" id="tabHistoryBtn" type="button">History</button>
+    <button class="tab-btn" id="tabBackupBtn" type="button">Backup</button>
   </div>
-  <button class="mini-btn" id="resetBtn" type="button" style="margin:6px 0;">↺ Reset Form</button>
+  <button class="mini-btn" id="resetBtn" type="button" style="margin:6px 0;" aria-label="Reset form">↺<span class="reset-label"> Reset Form</span></button>
 </div>
 
 <div id="calculatorView">
@@ -634,7 +667,10 @@
   </section>
 
   <button class="save-history-btn" id="saveHistoryBtn" type="button">💾 Save this calculation to History</button>
-  <button class="report-btn" id="downloadReportBtn" type="button">📄 Download Cable Report (A4 PDF)</button>
+  <div class="report-actions">
+    <button class="report-btn" id="downloadReportBtn" type="button">📄 Download Report (A4 PDF)</button>
+    <button class="report-btn share-btn" id="shareReportBtn" type="button">📤 Share PDF — WhatsApp, Email…</button>
+  </div>
 
   <details class="card collapsible-card">
     <summary class="card-head"><h2>Load Summary</h2><span class="chev">▸</span></summary>
@@ -653,6 +689,42 @@
     <div class="card-body" id="historyList"></div>
   </section>
   <div class="hint" style="margin-top:6px;">Saved on this device only (browser local storage) — nothing is uploaded anywhere.</div>
+</div>
+
+<div id="backupView" style="display:none; padding:26px 28px 60px; max-width:760px;">
+  <section class="card">
+    <div class="card-head"><h2>Download Backup</h2></div>
+    <div class="card-body">
+      <div class="backup-stats">
+        <div><span class="k">Saved calculations</span><span class="v mono" id="backupCount">0</span></div>
+        <div><span class="k">Last backup</span><span class="v mono" id="backupLast">Never</span></div>
+      </div>
+      <p class="backup-text">Saves every calculation in your History to one small <b>.json</b> file. Keep it in Google Drive, email it to yourself, or send it to another phone. History lives only in this browser, so clearing site data or uninstalling the app deletes it unless you have a backup.</p>
+      <div class="backup-actions">
+        <button class="save-history-btn" id="downloadBackupBtn" type="button">⬇ Download Backup File</button>
+        <button class="report-btn share-btn" id="shareBackupBtn" type="button">📤 Share Backup — WhatsApp, Drive…</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Restore from Backup</h2></div>
+    <div class="card-body">
+      <p class="backup-text">Choose a backup file made by this app (<span class="mono">cable-select-backup-….json</span>). You'll see what's in it before anything changes.</p>
+      <input type="file" id="restoreFile" accept=".json,application/json" hidden>
+      <button class="report-btn" id="chooseRestoreBtn" type="button">📂 Choose Backup File…</button>
+      <div id="restorePreview" class="restore-preview" hidden>
+        <div class="restore-summary" id="restoreSummary"></div>
+        <div class="restore-actions">
+          <button class="save-history-btn" id="restoreMergeBtn" type="button">Merge into my History</button>
+          <button class="report-btn danger-outline" id="restoreReplaceBtn" type="button">Replace my History</button>
+          <button class="mini-btn" id="restoreCancelBtn" type="button">Cancel</button>
+        </div>
+        <div class="hint"><b>Merge</b> adds calculations you don't already have and keeps your current ones. <b>Replace</b> deletes your current History and uses the backup instead.</div>
+      </div>
+      <div class="restore-msg" id="restoreMsg" role="status" aria-live="polite"></div>
+    </div>
+  </section>
 </div>
 
 <!-- Phones only: keeps the main result visible while editing inputs far above it -->
@@ -1278,17 +1350,25 @@ $('addKvaBtn').addEventListener('click', ()=>{
 updateKvaResult();
 
 // ---- Tabs (Calculator / History) ----
+const TABS = {
+  calc:    {view:'calculatorView', btn:'tabCalcBtn'},
+  history: {view:'historyView',    btn:'tabHistoryBtn'},
+  backup:  {view:'backupView',     btn:'tabBackupBtn'},
+};
 function showTab(tab){
-  const isCalc = tab === 'calc';
-  $('calculatorView').style.display = isCalc ? '' : 'none';
-  $('historyView').style.display = isCalc ? 'none' : '';
-  $('tabCalcBtn').classList.toggle('active', isCalc);
-  $('tabHistoryBtn').classList.toggle('active', !isCalc);
-  $('resultBar').style.visibility = isCalc ? '' : 'hidden';
-  if (!isCalc) renderHistory();
+  if (!TABS[tab]) tab = 'calc';
+  Object.entries(TABS).forEach(([key, t])=>{
+    $(t.view).style.display = key === tab ? '' : 'none';
+    $(t.btn).classList.toggle('active', key === tab);
+    $(t.btn).setAttribute('aria-selected', key === tab ? 'true' : 'false');
+  });
+  $('resultBar').style.visibility = tab === 'calc' ? '' : 'hidden';
+  if (tab === 'history') renderHistory();
+  if (tab === 'backup') renderBackupStats();
 }
 $('tabCalcBtn').addEventListener('click', ()=>showTab('calc'));
 $('tabHistoryBtn').addEventListener('click', ()=>showTab('history'));
+$('tabBackupBtn').addEventListener('click', ()=>showTab('backup'));
 
 // ---- History (saved locally in this browser only) ----
 const HISTORY_KEY = 'cableSelectHistory';
@@ -1452,6 +1532,163 @@ $('clearHistoryBtn').addEventListener('click', ()=>{
     renderHistory();
   }
 });
+
+// ---- Backup / Restore (History <-> .json file) ----
+const BACKUP_APP_ID = 'cable-select';
+const BACKUP_VERSION = 1;
+const LAST_BACKUP_KEY = 'cableSelectLastBackup';
+const HISTORY_LIMIT = 200;
+const MAX_BACKUP_BYTES = 5 * 1024 * 1024;
+
+function readLastBackup(){
+  try { const v = Number(localStorage.getItem(LAST_BACKUP_KEY)); return isFinite(v) && v > 0 ? v : 0; }
+  catch(e){ return 0; }
+}
+function renderBackupStats(){
+  const n = loadHistory().length;
+  $('backupCount').textContent = String(n);
+  const last = readLastBackup();
+  $('backupLast').textContent = last ? fmtDate(last) : 'Never';
+  $('downloadBackupBtn').disabled = n === 0;
+  $('shareBackupBtn').disabled = n === 0;
+}
+function backupFile(){
+  const history = loadHistory();
+  const payload = {
+    app: BACKUP_APP_ID,
+    type: 'history-backup',
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    count: history.length,
+    history,
+  };
+  const day = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const name = `cable-select-backup-${day.getFullYear()}-${pad(day.getMonth()+1)}-${pad(day.getDate())}-${pad(day.getHours())}${pad(day.getMinutes())}.json`;
+  return new File([JSON.stringify(payload, null, 1)], name, {type:'application/json'});
+}
+function markBackedUp(){
+  try { localStorage.setItem(LAST_BACKUP_KEY, String(Date.now())); } catch(e){}
+  renderBackupStats();
+}
+
+$('downloadBackupBtn').addEventListener('click', ()=>{
+  if (loadHistory().length === 0){ alert('History is empty - save a calculation first.'); return; }
+  const f = backupFile();
+  downloadBlob(f, f.name);
+  markBackedUp();
+});
+
+const SHARE_BACKUP_FALLBACK = 'This browser can\'t send files straight to other apps, so the backup file has been downloaded instead. You can attach it from your Downloads / Files.';
+$('shareBackupBtn').addEventListener('click', async ()=>{
+  const btn = $('shareBackupBtn');
+  const pending = pendingShares[btn.id];
+  const f = pending ? pending.file : backupFile();
+  if (pending) clearPendingShare(btn);
+  if (loadHistory().length === 0){ alert('History is empty - save a calculation first.'); return; }
+  const r = await shareFile(f, 'Cable Select backup');
+  if (r === 'shared'){ markBackedUp(); return; }
+  if (pending && r === 'needs-tap'){ downloadBlob(f, f.name); markBackedUp(); alert(SHARE_BACKUP_FALLBACK); return; }
+  await handleShareResult(r, btn, f, 'Cable Select backup', SHARE_BACKUP_FALLBACK);
+  if (r === 'unsupported' || r === 'failed') markBackedUp();
+});
+
+// Keep only well-formed calculation entries from an untrusted file.
+function sanitizeBackupEntries(list){
+  const out = [];
+  const seen = new Set();
+  (Array.isArray(list) ? list : []).forEach(e=>{
+    if (!e || typeof e !== 'object' || Array.isArray(e)) return;
+    if (typeof e.id !== 'string' && typeof e.id !== 'number') return;
+    const id = String(e.id).slice(0, 80);
+    if (!id || seen.has(id)) return;
+    const ts = Number(e.ts);
+    if (!isFinite(ts) || ts <= 0) return;
+    if (!Array.isArray(e.invRows)) return;
+    seen.add(id);
+    out.push(Object.assign({}, e, { id, ts }));
+  });
+  return out;
+}
+function parseBackupText(text){
+  let data;
+  try { data = JSON.parse(text); }
+  catch(e){ throw new Error('This file isn\'t a valid backup (it couldn\'t be read as JSON).'); }
+  let list;
+  if (Array.isArray(data)) list = data;                                  // bare history array
+  else if (data && typeof data === 'object' && Array.isArray(data.history)){
+    if (data.app && data.app !== BACKUP_APP_ID) throw new Error('This backup was made by a different app ("'+String(data.app).slice(0,40)+'").');
+    if (Number(data.version) > BACKUP_VERSION) throw new Error('This backup was made by a newer version of the app. Update the app (reload the page) and try again.');
+    list = data.history;
+  } else throw new Error('This file isn\'t a Cable Select backup.');
+  const entries = sanitizeBackupEntries(list);
+  if (entries.length === 0) throw new Error('The backup contains no calculations that can be restored.');
+  return { entries, skipped: list.length - entries.length, exportedAt: data && data.exportedAt };
+}
+
+let pendingRestore = null;
+function setRestoreMsg(text, kind){
+  const el = $('restoreMsg');
+  el.textContent = text || '';
+  el.className = 'restore-msg' + (kind ? ' '+kind : '');
+}
+function closeRestorePreview(){
+  pendingRestore = null;
+  $('restorePreview').hidden = true;
+  $('restoreFile').value = '';
+}
+
+$('chooseRestoreBtn').addEventListener('click', ()=>{ setRestoreMsg(''); $('restoreFile').click(); });
+$('restoreFile').addEventListener('change', async ()=>{
+  const file = $('restoreFile').files && $('restoreFile').files[0];
+  if (!file) return;
+  closeRestorePreview();
+  if (file.size > MAX_BACKUP_BYTES){ setRestoreMsg('That file is too large to be a Cable Select backup.', 'err'); return; }
+  try {
+    const parsed = parseBackupText(await file.text());
+    pendingRestore = parsed;
+    const current = new Set(loadHistory().map(e => String(e.id)));
+    const fresh = parsed.entries.filter(e => !current.has(e.id)).length;
+    const tss = parsed.entries.map(e => e.ts);
+    const exported = parsed.exportedAt && !isNaN(new Date(parsed.exportedAt)) ? fmtDate(parsed.exportedAt) : 'unknown';
+    $('restoreSummary').innerHTML =
+      `<b>${escapeHtml(file.name)}</b><br>` +
+      `${parsed.entries.length} calculation${parsed.entries.length>1?'s':''} · made ${escapeHtml(exported)}<br>` +
+      `Dated ${escapeHtml(fmtDate(Math.min(...tss)))} → ${escapeHtml(fmtDate(Math.max(...tss)))}<br>` +
+      `${fresh} new to this device, ${parsed.entries.length - fresh} already here` +
+      (parsed.skipped > 0 ? `<br><span style="color:var(--warn)">${parsed.skipped} damaged entr${parsed.skipped>1?'ies':'y'} will be skipped</span>` : '');
+    $('restorePreview').hidden = false;
+  } catch(err){
+    setRestoreMsg(err.message || 'Could not read that file.', 'err');
+    $('restoreFile').value = '';
+  }
+});
+
+function finishRestore(arr, message){
+  arr.sort((a,b) => b.ts - a.ts);
+  const dropped = Math.max(0, arr.length - HISTORY_LIMIT);
+  if (!saveHistoryArr(arr.slice(0, HISTORY_LIMIT))){
+    setRestoreMsg('Could not save: this browser is blocking or out of local storage (e.g. private/incognito mode).', 'err');
+    return;
+  }
+  closeRestorePreview();
+  renderBackupStats();
+  setRestoreMsg(message + (dropped ? ` History keeps the newest ${HISTORY_LIMIT}, so the ${dropped} oldest were left out.` : '') + ' Open the History tab to load any of them.', 'ok');
+}
+$('restoreMergeBtn').addEventListener('click', ()=>{
+  if (!pendingRestore) return;
+  const current = loadHistory();
+  const have = new Set(current.map(e => String(e.id)));
+  const add = pendingRestore.entries.filter(e => !have.has(e.id));
+  finishRestore(current.concat(add), `✓ Restored ${add.length} calculation${add.length===1?'':'s'} (${pendingRestore.entries.length - add.length} already in History).`);
+});
+$('restoreReplaceBtn').addEventListener('click', ()=>{
+  if (!pendingRestore) return;
+  const n = loadHistory().length;
+  if (n > 0 && !confirm(`Replace your ${n} saved calculation${n>1?'s':''} with the ${pendingRestore.entries.length} in this backup? Your current History will be deleted.`)) return;
+  finishRestore(pendingRestore.entries.slice(), `✓ History replaced with ${pendingRestore.entries.length} calculation${pendingRestore.entries.length>1?'s':''} from the backup.`);
+});
+$('restoreCancelBtn').addEventListener('click', ()=>{ closeRestorePreview(); setRestoreMsg(''); });
 
 // ---- Reset to blank ----
 function resetForm(){
@@ -1874,32 +2111,122 @@ function generatePdfReport(){
   }
 
   const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
-  doc.save(`cable-report-${stamp}.pdf`);
+  return { doc, filename: `cable-report-${stamp}.pdf` };
 }
 
-$('downloadReportBtn').addEventListener('click', async ()=>{
+// Builds the PDF (loading the engine on first use). Returns {doc, filename}
+// or null after telling the user what went wrong.
+async function buildReport(){
   const blocker = resultBlocker();
-  if (blocker){ alert(blocker); return; }
-  const btn = $('downloadReportBtn');
-  const orig = btn.textContent;
-  btn.textContent = 'Generating PDF…';
-  btn.disabled = true;
-  try {
-    try { await ensurePdfLibs(); }
-    catch(err){
-      alert('Could not load the PDF engine. It needs an internet connection the first time (after that it works offline). Please check your connection and try again.');
-      return;
-    }
-    try { generatePdfReport(); }
-    catch(err){
-      console.warn('PDF generation failed:', err);
-      alert('Sorry - the PDF could not be created ('+(err && err.message ? err.message : 'unknown error')+'). Please report this.');
-    }
-  } finally {
-    btn.textContent = orig;
-    btn.disabled = false;
+  if (blocker){ alert(blocker); return null; }
+  try { await ensurePdfLibs(); }
+  catch(err){
+    alert('Could not load the PDF engine. It needs an internet connection the first time (after that it works offline). Please check your connection and try again.');
+    return null;
   }
+  try { return generatePdfReport(); }
+  catch(err){
+    console.warn('PDF generation failed:', err);
+    alert('Sorry - the PDF could not be created ('+(err && err.message ? err.message : 'unknown error')+'). Please report this.');
+    return null;
+  }
+}
+
+async function withBusy(btn, busyText, fn){
+  const orig = btn.textContent;
+  btn.textContent = busyText;
+  btn.disabled = true;
+  try { return await fn(); }
+  finally { btn.textContent = orig; btn.disabled = false; }
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 30000);
+}
+
+// Opens the phone's share sheet (WhatsApp, Gmail, Drive, Teams, Bluetooth…)
+// with the file attached. Returns 'shared' | 'cancelled' | 'unsupported' |
+// 'needs-tap' (browser wants a fresh tap because building the file took a
+// moment) | 'failed'.
+async function shareFile(file, title){
+  if (!(navigator.share && navigator.canShare && navigator.canShare({files:[file]}))) return 'unsupported';
+  try {
+    // Files + title only: some apps (WhatsApp on iPhone) drop the file when text is also attached.
+    await navigator.share({ files:[file], title });
+    return 'shared';
+  } catch(err){
+    if (err && err.name === 'AbortError') return 'cancelled';
+    if (err && err.name === 'NotAllowedError') return 'needs-tap';
+    console.warn('Share failed:', err);
+    return 'failed';
+  }
+}
+
+// A file that's ready but needs one more tap to share (see 'needs-tap').
+const pendingShares = {};
+function armPendingShare(btn, file, title, label){
+  const key = btn.id;
+  clearTimeout(pendingShares[key] && pendingShares[key].timer);
+  const orig = btn.dataset.label || btn.textContent;
+  btn.dataset.label = orig;
+  btn.textContent = label;
+  btn.classList.add('ready');
+  pendingShares[key] = { file, title, timer: setTimeout(()=>clearPendingShare(btn), 60000) };
+}
+function clearPendingShare(btn){
+  const p = pendingShares[btn.id];
+  if (!p) return;
+  clearTimeout(p.timer);
+  delete pendingShares[btn.id];
+  if (btn.dataset.label) btn.textContent = btn.dataset.label;
+  btn.classList.remove('ready');
+}
+async function handleShareResult(result, btn, file, title, fallbackMsg){
+  if (result === 'needs-tap'){
+    armPendingShare(btn, file, title, '📤 Ready — tap again to share');
+  } else if (result === 'unsupported' || result === 'failed'){
+    downloadBlob(file, file.name);
+    alert(fallbackMsg);
+  }
+}
+
+$('downloadReportBtn').addEventListener('click', ()=>{
+  const btn = $('downloadReportBtn');
+  return withBusy(btn, 'Generating PDF…', async ()=>{
+    const rep = await buildReport();
+    if (rep) rep.doc.save(rep.filename);
+  });
 });
+
+const SHARE_PDF_FALLBACK = 'This browser can\'t send files straight to other apps, so the PDF has been downloaded instead.\n\nOpen WhatsApp (or your email app), tap the attach (📎) button and pick the PDF from your Downloads / Files.';
+
+$('shareReportBtn').addEventListener('click', async ()=>{
+  const btn = $('shareReportBtn');
+  const pending = pendingShares[btn.id];
+  if (pending){
+    clearPendingShare(btn);
+    const r = await shareFile(pending.file, pending.title);
+    if (r === 'unsupported' || r === 'failed' || r === 'needs-tap'){ downloadBlob(pending.file, pending.file.name); alert(SHARE_PDF_FALLBACK); }
+    return;
+  }
+  let file = null;
+  await withBusy(btn, 'Preparing PDF…', async ()=>{
+    const rep = await buildReport();
+    if (!rep) return;
+    file = new File([rep.doc.output('blob')], rep.filename, {type:'application/pdf'});
+  });
+  if (!file) return;
+  const title = 'AC Cable Selection Report';
+  const r = await shareFile(file, title);
+  await handleShareResult(r, btn, file, title, SHARE_PDF_FALLBACK);
+});
+
+// A prepared-but-unsent report goes stale as soon as an input changes.
+['input','change'].forEach(ev => $('calculatorView').addEventListener(ev, ()=>clearPendingShare($('shareReportBtn'))));
 
 // ---- PWA: register service worker ----
 if ('serviceWorker' in navigator){
