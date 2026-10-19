@@ -2,7 +2,7 @@
   "name": "AC Cable Selection — Solar EPC",
   "short_name": "Cable Select",
   "description": "Solar inverter AC cable sizing — current capacity, grouping and voltage drop calculator.",
-  "id": "./",
+  "id": "/AC-Cable-Select-2.0/",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
